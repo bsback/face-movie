@@ -37,11 +37,23 @@ def get_landmarks(im):
 
     target_rect = rects[0] 
     if len(rects) > 1:
-        target_rect = prompt_user_to_choose_face(im, rects)
+        target_rect = choose_larger_face(im, rects)
 
     landmarks = np.array([(p.x, p.y) for p in PREDICTOR(im, target_rect).parts()])
     landmarks = np.append(landmarks, get_boundary_points(im.shape), axis=0)
     return landmarks
+
+def choose_larger_face(im, rects):
+    rect = None
+    area = 0
+    for i in range(len(rects)):
+        d = rects[i]
+        x1, y1, x2, y2 = d.left(), d.top(), d.right() + 1, d.bottom() + 1
+        area_size = (x2 - x1) * (y2 - y1)
+        if area_size > area:
+            area = area_size
+            rect = d
+    return rect
 
 def prompt_user_to_choose_face(im, rects):
     im = im.copy()
